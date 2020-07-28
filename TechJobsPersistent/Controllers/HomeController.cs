@@ -16,7 +16,6 @@ namespace TechJobsPersistent.Controllers
     public class HomeController : Controller
     {
         private JobDbContext context;
-
         public HomeController(JobDbContext dbContext)
         {
             context = dbContext;
@@ -30,14 +29,16 @@ namespace TechJobsPersistent.Controllers
         }
 
         [HttpGet("/Add")]
-        public IActionResult AddJob(AddJobViewModel addJobViewModel)
+        public IActionResult AddJob()
         {
+            AddJobViewModel addJobViewModel = new AddJobViewModel(context.Employers.ToList(), context.Skills.ToList());
+
             return View(addJobViewModel);
         }
 
         [HttpPost]
         [Route("/Add")]
-        public IActionResult ProcessAddJobForm(AddJobViewModel addJobViewModel /*string[] selectedSkills*/)
+        public IActionResult ProcessAddJobForm(AddJobViewModel addJobViewModel, string[] selectedSkills)
         {
             if (ModelState.IsValid)
             {
@@ -51,21 +52,21 @@ namespace TechJobsPersistent.Controllers
                     Employer = employer
                 };
 
-                //foreach (string skill in selectedSkills)
-                //{
-                //    Skill theSkill = context.Skills
-                //        .Single(s => s.Name == skill);
+                foreach (string skill in selectedSkills)
+                {
+                    Skill theSkill = context.Skills
+                        .Single(s => s.Name == skill);
 
-                //    JobSkill newJobSkill = new JobSkill
-                //    {
-                //        JobId = newJob.Id,
-                //        Job = newJob,
-                //        SkillId = theSkill.Id,
-                //        Skill = theSkill
-                //    };
-                //    jobSkills.Add(newJobSkill);
-                //    context.JobSkills.Add(newJobSkill);
-                //};
+                    JobSkill newJobSkill = new JobSkill
+                    {
+                        JobId = newJob.Id,
+                        Job = newJob,
+                        SkillId = theSkill.Id,
+                        Skill = theSkill
+                    };
+                    jobSkills.Add(newJobSkill);
+                    context.JobSkills.Add(newJobSkill);
+                };
 
                 newJob.JobSkills = jobSkills;
 
